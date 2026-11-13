@@ -53,8 +53,6 @@ ul { list-style: none; padding: 0; }
 /* Scroll warp, driven by --warp (-1..1) from scroll velocity. */
 .tile .ph { transform: skewY(calc(var(--warp, 0) * 2.2deg)) scaleY(calc(1 + var(--warp, 0) * var(--warp, 0) * .08)); transform-origin: 50% calc(50% - var(--warp, 0) * 50%); will-change: transform; }
 .tile .ph img { translate: 0 calc(var(--warp, 0) * -14px); }
-/* Tiny red/blue split while scrolling, scaled by speed. */
-.tile .ph { filter: drop-shadow(0 calc(var(--warp, 0) * 3px) 0 rgb(255 30 70 / .3)) drop-shadow(0 calc(var(--warp, 0) * -3px) 0 rgb(30 120 255 / .3)); }
 .tile img { transition: transform 1.1s var(--ease); }
 .tile:hover img { transform: scale(1.04); }
 .tile .cap { transition: transform .6s var(--ease); }
@@ -130,17 +128,16 @@ html.vt-lb::view-transition-new(root) { animation: vt-in .35s ease both; }
 /* Lightbox zoom: slightly quicker. */
 ::view-transition-group(zoom) { animation-duration: .6s; }
 @keyframes vt-out { to { opacity: 0; } }
-@keyframes rgb-split { 50% { filter: drop-shadow(3px 0 0 rgb(255 30 70 / .3)) drop-shadow(-3px 0 0 rgb(30 120 255 / .3)); } }
 @keyframes vt-in { from { opacity: 0; } }
 
 html.vt-swap::view-transition-new(root) { animation: none; }
 html.vt-swap::view-transition-old(root) { animation: none; opacity: 0; }
 ::view-transition-group(*) { animation-duration: .9s; }
 /* 3D tilt arcs for flying images, peak mid flight, flat on landing. */
-@keyframes tilt-a { 50% { filter: drop-shadow(3px 0 0 rgb(255 30 70 / .3)) drop-shadow(-3px 0 0 rgb(30 120 255 / .3)); transform: perspective(1100px) rotateX(22deg) rotateY(-16deg) rotateZ(-5deg); } }
-@keyframes tilt-b { 50% { filter: drop-shadow(3px 0 0 rgb(255 30 70 / .3)) drop-shadow(-3px 0 0 rgb(30 120 255 / .3)); transform: perspective(1100px) rotateX(-18deg) rotateY(20deg) rotateZ(4deg); } }
-@keyframes tilt-c { 50% { filter: drop-shadow(3px 0 0 rgb(255 30 70 / .3)) drop-shadow(-3px 0 0 rgb(30 120 255 / .3)); transform: perspective(1100px) rotateX(26deg) rotateY(10deg) rotateZ(7deg); } }
-@keyframes tilt-d { 50% { filter: drop-shadow(3px 0 0 rgb(255 30 70 / .3)) drop-shadow(-3px 0 0 rgb(30 120 255 / .3)); transform: perspective(1100px) rotateX(-12deg) rotateY(-24deg) rotateZ(-3deg); } }
+@keyframes tilt-a { 50% { transform: perspective(1100px) rotateX(22deg) rotateY(-16deg) rotateZ(-5deg); } }
+@keyframes tilt-b { 50% { transform: perspective(1100px) rotateX(-18deg) rotateY(20deg) rotateZ(4deg); } }
+@keyframes tilt-c { 50% { transform: perspective(1100px) rotateX(26deg) rotateY(10deg) rotateZ(7deg); } }
+@keyframes tilt-d { 50% { transform: perspective(1100px) rotateX(-12deg) rotateY(-24deg) rotateZ(-3deg); } }
 
 /* intro: loader counter, then panel fades in and tiles fly up */
 .loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--bg); font-size: 13px; font-variant-numeric: tabular-nums; transition: opacity .6s .1s, visibility 0s .7s; }
