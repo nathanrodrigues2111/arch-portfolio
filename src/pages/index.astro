@@ -231,19 +231,35 @@ const css = projects.map(({ id }) => [
   let list: HTMLElement[] = [];
   let items: HTMLImageElement[] = [];
   let at = 0;
-  const show = (i: number) => {
-    at = Math.max(0, Math.min(list.length - 1, i));
+  // Coverflow position is continuous: `pos` eases toward `target` every frame, so wheel, keys and swipes all glide.
+  let pos = 0, target = 0, raf = 0, idle = 0;
+  const paint = () => {
     items.forEach((el, j) => {
-      const o = j - at;
-      el.style.setProperty('--o', String(o));
-      el.style.setProperty('--a', String(Math.abs(o)));
-      el.classList.toggle('on', o === 0);
-      el.tabIndex = o === 0 ? -1 : 0;
+      const o = j - pos;
+      el.style.setProperty('--o', o.toFixed(4));
+      el.style.setProperty('--a', Math.abs(o).toFixed(4));
     });
+  };
+  const tickFlow = () => {
+    pos += (target - pos) * 0.14;
+    if (Math.abs(target - pos) < 0.001) pos = target;
+    paint();
+    raf = pos === target ? 0 : requestAnimationFrame(tickFlow);
+  };
+  const setAt = (i: number) => {
+    at = Math.max(0, Math.min(list.length - 1, i));
+    items.forEach((el, j) => { el.classList.toggle('on', j === at); el.tabIndex = j === at ? -1 : 0; });
     lb.querySelector('.lb-count')!.textContent = `${at + 1} / ${list.length}`;
     lb.querySelector<HTMLButtonElement>('.lb-prev')!.disabled = at === 0;
     lb.querySelector<HTMLButtonElement>('.lb-next')!.disabled = at === list.length - 1;
   };
+  const glide = (t: number) => {
+    target = Math.max(0, Math.min(list.length - 1, t));
+    setAt(Math.round(target));
+    if (!raf) raf = requestAnimationFrame(tickFlow);
+  };
+  const show = (i: number) => glide(i);
+  const jump = (i: number) => { setAt(i); pos = target = at; paint(); };
   // One image zooms between its tile and the front of the coverflow.
   const zoom = (fromEl: HTMLElement, toEl: () => HTMLElement, update: () => void) => {
     if (!canMorph || busy) return update();
@@ -278,7 +294,7 @@ const css = projects.map(({ id }) => [
     flow.replaceChildren(...items);
     const i = list.indexOf(t);
     items[i].decode().catch(() => {}).finally(() =>
-      zoom(t.querySelector('.ph')!, () => items[at], () => { lb.showModal(); show(i); lenis?.stop(); })
+      zoom(t.querySelector('.ph')!, () => items[at], () => { lb.showModal(); jump(i); lenis?.stop(); })
     );
   });
   const closeLb = () => {
@@ -302,11 +318,11 @@ const css = projects.map(({ id }) => [
     const dx = e.changedTouches[0].clientX - x0;
     if (Math.abs(dx) > 50) show(at + (dx < 0 ? 1 : -1));
   });
-  let wheelLock = 0;
+  // Wheel and trackpad move the flow continuously, then it settles on the nearest image.
   lb.addEventListener('wheel', (e) => {
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-    if (Math.abs(d) < 20 || performance.now() < wheelLock) return;
-    wheelLock = performance.now() + 450;
-    show(at + (d > 0 ? 1 : -1));
+    glide(target + d / 420);
+    clearTimeout(idle);
+    idle = window.setTimeout(() => glide(Math.round(target)), 140);
   }, { passive: true });
 </script>
