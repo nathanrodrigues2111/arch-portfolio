@@ -168,7 +168,10 @@ const css = projects.map(({ id }) => [
       t.style.setProperty('--y', `${Math.round(70 + col * 10 + depth * 20)}vh`);
     });
   };
-  const go = () => { wave(); loader.classList.add('done'); root.classList.add('in'); };
+  let started = false;
+  const go = () => { if (started) return; started = true; wave(); loader.classList.add('done'); root.classList.add('in'); };
+  // Never hold the page hostage: reveal after 4s even if a slow image or paused tab stalls the counter.
+  setTimeout(go, 4000);
   if (reduce) go();
   else {
     const imgs = [...grid.querySelectorAll('img')].slice(0, 12);
@@ -183,7 +186,7 @@ const css = projects.map(({ id }) => [
       const target = Math.min(ready, (t - start) / 1800) * 100;
       shown += (target - shown) * 0.08;
       label.textContent = `${Math.floor(shown)}%`;
-      if (shown > 99.4) { label.textContent = '100%'; setTimeout(go, 300); } else requestAnimationFrame(frame);
+      if (shown > 99.4) { label.textContent = '100%'; setTimeout(go, 300); } else if (!started) requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
   }
