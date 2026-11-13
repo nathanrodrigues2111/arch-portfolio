@@ -1,0 +1,304 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import site from '../site.json';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const rendered = await Promise.all(projects.map(async (p) => ({ p, Content: (await render(p)).Content })));
+const tiles = await Promise.all(
+  projects.flatMap((p) => p.data.images.map(async (img, i) => ({ p, img, i, full: (await getImage({ src: img, width: 2400, format: 'webp' })).src })))
+);
+
+// Per-project rules: hover keeps that project bright; open shows only its tiles and its info.
+const css = projects.map(({ id }) => [
+  `@media (hover:hover){.grid:has([data-p="${id}"]:hover) .tile:not([data-p="${id}"]){opacity:.22}}`,
+  `[data-open="${id}"] .tile:not([data-p="${id}"]){display:none}`,
+  `[data-open="${id}"] .pinfo[data-id="${id}"]{display:flex}`,
+].join('')).join('') +
+  // Flying images: each gets a staggered start and one of four 3D tilt arcs, so they move like paper.
+  tiles.map((_, i) => `::view-transition-group(m${i}){animation-delay:${Math.min(i * 22, 380)}ms}::view-transition-image-pair(m${i}){animation:tilt-${'abcd'[(i * 7) % 4]} .9s cubic-bezier(.6,0,.25,1) ${Math.min(i * 22, 380)}ms both}`).join('');
+---
+<Base>
+  <div class="loader" aria-hidden="true"><span>0%</span></div>
+  <style set:html={css}></style>
+
+  <div class="split" data-open="">
+    <aside class="side">
+      <!-- default panel -->
+      <div class="info">
+        <a href="#" class="mark">{site.name}</a>
+        <p>{site.role}, {site.city}<br /><span class="muted"><time data-clock data-tz={site.timezone}>--:--</time> local. {site.availability}</span></p>
+        <p class="intro">{site.intro}</p>
+        <div class="cols">
+          <div><p>Services</p><ul class="muted">{site.services.map((x) => <li>{x}</li>)}</ul></div>
+          <div><p>Recognition</p><ul class="muted">{site.recognition.map((x) => <li>{x}</li>)}</ul></div>
+        </div>
+        <div class="contact">
+          <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+          <p class="links muted">{site.social.map((s) => <a href={s.url} target="_blank" rel="noopener">{s.label}</a>)}</p>
+        </div>
+      </div>
+
+      <!-- one panel per project, shown when that project is open -->
+      {rendered.map(({ p, Content }, n) => {
+        const d = p.data;
+        const next = projects[(n + 1) % projects.length];
+        const meta = [['Location', d.location], ['Year', d.year], ['Type', d.type], ['Area', d.area], ['Status', d.status]].filter(([, v]) => v);
+        return (
+          <article class="pinfo" data-id={p.id}>
+            <a href="#" class="back muted">&larr; All work</a>
+            <h2>{d.title}</h2>
+            <dl>{meta.map(([k, v]) => <div><dt class="muted">{k}</dt><dd>{v}</dd></div>)}</dl>
+            <div class="body"><Content /></div>
+            <a class="next" href={`#${next.id}`}><span class="muted">Next project</span>{next.data.title}</a>
+          </article>
+        );
+      })}
+    </aside>
+
+    <main class="work">
+      <section class="grid" data-view="grid">
+        {tiles.map(({ p, img, i, full }, n) => (
+          <a
+            class="tile"
+            href={`#${p.id}`}
+            data-p={p.id}
+            data-first={i === 0 ? "" : undefined}
+            data-full={full}
+          >
+            <div class="cap"><b>{i === 0 ? p.data.title : ''}</b><span>{i === 0 ? p.data.year : i + 1}</span></div>
+            <div class="ph">
+              <Image src={img} alt={`${p.data.title}, image ${i + 1}`} widths={[500, 900, 1600, 2200]} sizes="(max-width: 800px) 50vw, 40vw" loading={n < 12 ? 'eager' : 'lazy'} />
+            </div>
+          </a>
+        ))}
+      </section>
+      <div class="toggle">
+        <button data-v="grid" aria-pressed="true">Grid</button>
+        <button data-v="gallery" aria-pressed="false">Gallery</button>
+      </div>
+    </main>
+  </div>
+
+  <dialog class="lightbox" aria-label="Project gallery">
+    <div class="lb-bar"><span class="lb-title"></span><span class="lb-count muted"></span><button class="lb-btn lb-close">Close</button></div>
+    <div class="lb-stage" tabindex="-1" autofocus>
+      <img alt="" />
+      <button class="lb-btn lb-prev" aria-label="Previous image">&larr;</button>
+      <button class="lb-btn lb-next" aria-label="Next image">&rarr;</button>
+    </div>
+    <div class="lb-thumbs"></div>
+  </dialog>
+</Base>
+
+<script>
+  import Lenis from 'lenis';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const root = document.documentElement;
+  const split = document.querySelector<HTMLElement>('.split')!;
+  const grid = document.querySelector<HTMLElement>('.grid')!;
+  const canMorph = !reduce && !!document.startViewTransition;
+
+  // Smooth, weighted scrolling (off for reduced motion).
+  const lenis = reduce ? null : new Lenis({ autoRaf: true, lerp: 0.09 });
+  // Scroll warp: images stretch and skew with scroll speed, then ease back when scrolling stops.
+  if (lenis) {
+    let warp = 0;
+    const loop = () => {
+      const target = Math.max(-1, Math.min(1, lenis.velocity / 40));
+      warp += (target - warp) * 0.12;
+      if (Math.abs(warp) < 0.0005) warp = 0;
+      grid.style.setProperty('--warp', warp.toFixed(4));
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  }
+  const toTop = () => (lenis ? lenis.scrollTo(0, { immediate: true }) : window.scrollTo(0, 0));
+
+  // Morph helper: only the given image boxes get transition names, so nothing else flies around.
+  // Names are cleared once the transition ends.
+  let busy = false;
+  const morph = (boxes: HTMLElement[], update: () => void, cls = '') => {
+    if (!canMorph || busy) return update();
+    busy = true;
+    boxes.forEach((b, i) => (b.style.viewTransitionName = `m${i}`));
+    if (cls) root.classList.add(cls);
+    const vt = document.startViewTransition(update);
+    vt.finished.finally(() => {
+      boxes.forEach((b) => (b.style.viewTransitionName = ''));
+      if (cls) root.classList.remove(cls);
+      busy = false;
+    });
+    return vt;
+  };
+  const boxesOf = (id: string) => [...grid.querySelectorAll<HTMLElement>(`.tile[data-p="${CSS.escape(id)}"] .ph`)];
+
+  // Clock
+  const clock = document.querySelector<HTMLElement>('[data-clock]')!;
+  const tick = () => (clock.textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: clock.dataset.tz }).format(new Date()));
+  tick(); setInterval(tick, 10000);
+
+  // Intro, every load: % counter on black, then panel fades in and tiles rise in a left to right wave.
+  const loader = document.querySelector<HTMLElement>('.loader')!;
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.remove('later');
+    io.unobserve(e.target);
+  }), { rootMargin: '0px 0px -8% 0px' });
+  grid.addEventListener('animationend', (e) => {
+    const el = e.target as HTMLElement;
+    if (el.tagName === 'IMG') el.closest('.tile')?.classList.add('done');
+  });
+  const wave = () => {
+    const g = grid.getBoundingClientRect();
+    const cols = parseInt(getComputedStyle(grid).columnCount) || 2;
+    const colW = g.width / cols;
+    grid.querySelectorAll<HTMLElement>('.tile').forEach((t) => {
+      const r = t.getBoundingClientRect();
+      if (!r.height) { t.classList.add('done'); return; } // hidden (another project is open)
+      if (r.top > innerHeight) {
+        t.classList.add('later');
+        t.style.setProperty('--y', '14vh');
+        io.observe(t);
+        return;
+      }
+      const col = Math.min(cols - 1, Math.floor((r.left - g.left + 2) / colW));
+      const depth = r.top / innerHeight;
+      t.style.setProperty('--d', `${Math.round(col * 120 + depth * 260)}ms`);
+      t.style.setProperty('--y', `${Math.round(70 + col * 10 + depth * 20)}vh`);
+    });
+  };
+  const go = () => { wave(); loader.classList.add('done'); root.classList.add('in'); };
+  if (reduce) go();
+  else {
+    const imgs = [...grid.querySelectorAll('img')].slice(0, 12);
+    const label = loader.querySelector('span')!;
+    const start = performance.now();
+    let shown = 0;
+    let fontsOk = false;
+    document.fonts.ready.then(() => (fontsOk = true));
+    const frame = (t: number) => {
+      // Follows real image and font loading, but takes at least ~1.8s so the count reads.
+      const ready = (imgs.filter((i) => i.complete).length + (fontsOk ? 1 : 0)) / (imgs.length + 1);
+      const target = Math.min(ready, (t - start) / 1800) * 100;
+      shown += (target - shown) * 0.08;
+      label.textContent = `${Math.floor(shown)}%`;
+      if (shown > 99.4) { label.textContent = '100%'; setTimeout(go, 300); } else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  // Grid / Gallery: fade out, relayout, fade back in. No cross-flying images.
+  const btns = document.querySelectorAll<HTMLButtonElement>('.toggle button');
+  const setView = (v: string) => {
+    grid.dataset.view = v;
+    btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+    localStorage.setItem('view', v);
+  };
+  setView(localStorage.getItem('view') === 'gallery' ? 'gallery' : 'grid');
+  btns.forEach((b) => (b.onclick = () => {
+    const v = b.dataset.v!;
+    if (v === grid.dataset.view) return;
+    // Every visible image flies to its new spot with a 3D tilt.
+    morph([...grid.querySelectorAll<HTMLElement>('.ph')], () => setView(v), 'vt-swap');
+  }));
+
+  // Open a project in place. URL hash is the state, so back button and shared links work.
+  const current = () => split.dataset.open || '';
+  const open = (animate: boolean) => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const next = document.querySelector(`.pinfo[data-id="${CSS.escape(id)}"]`) ? id : '';
+    const prev = current();
+    if (next === prev) return;
+    const apply = () => {
+      (document.activeElement as HTMLElement | null)?.blur();
+      split.dataset.open = next;
+      toTop();
+    };
+    if (!animate) return apply();
+    // Opening: the chosen project's images morph from grid to big. Closing: back again.
+    // Project to project: plain fade. Everything else fades in after the morph lands.
+    const boxes = next && !prev ? boxesOf(next) : prev && !next ? boxesOf(prev) : [];
+    morph(boxes, apply, next ? 'vt-open' : 'vt-close');
+  };
+  open(false);
+  addEventListener('hashchange', () => open(true));
+  addEventListener('keydown', (e) => e.key === 'Escape' && current() && !lb.open && (location.hash = ''));
+
+  // Lightbox gallery inside an open project. Native <dialog> handles Esc and focus.
+  const lb = document.querySelector<HTMLDialogElement>('.lightbox')!;
+  const lbImg = lb.querySelector<HTMLImageElement>('.lb-stage img')!;
+  const lbThumbs = lb.querySelector<HTMLElement>('.lb-thumbs')!;
+  let list: HTMLElement[] = [];
+  let at = 0;
+  const show = (i: number, dir = 0) => {
+    at = (i + list.length) % list.length;
+    const t = list[at];
+    lbImg.className = dir > 0 ? 'out-r' : dir < 0 ? 'out-l' : '';
+    lbImg.src = t.dataset.full!;
+    lbImg.alt = t.querySelector('img')!.alt;
+    lbImg.decode().catch(() => {}).finally(() => requestAnimationFrame(() => (lbImg.className = '')));
+    [at + 1, at - 1].forEach((j) => (new Image().src = list[(j + list.length) % list.length].dataset.full!));
+    lb.querySelector('.lb-count')!.textContent = `${at + 1} / ${list.length}`;
+    lbThumbs.querySelectorAll('button').forEach((b, j) => {
+      b.setAttribute('aria-current', String(j === at));
+      if (j === at) b.scrollIntoView({ block: 'nearest', inline: 'center' });
+    });
+  };
+  // One image zooms between its tile and the lightbox: tile box is named in the old state, lightbox image in the new.
+  const zoom = (fromEl: HTMLElement, toEl: HTMLElement, update: () => void) => {
+    if (!canMorph || busy) return update();
+    busy = true;
+    fromEl.style.viewTransitionName = 'zoom';
+    const vt = document.startViewTransition(() => {
+      fromEl.style.viewTransitionName = '';
+      toEl.style.viewTransitionName = 'zoom';
+      update();
+    });
+    vt.finished.finally(() => { toEl.style.viewTransitionName = ''; busy = false; });
+  };
+  grid.addEventListener('click', (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('.tile');
+    if (!t || !current()) return;
+    e.preventDefault();
+    if (lb.open || busy) return;
+    list = [...grid.querySelectorAll<HTMLElement>(`.tile[data-p="${CSS.escape(current())}"]`)];
+    lb.querySelector('.lb-title')!.textContent = document.querySelector(`.pinfo[data-id="${CSS.escape(current())}"] h2`)!.textContent;
+    lbThumbs.replaceChildren(...list.map((x, j) => {
+      const b = document.createElement('button');
+      b.setAttribute('aria-label', `Image ${j + 1}`);
+      const im = document.createElement('img');
+      im.src = x.querySelector('img')!.currentSrc;
+      im.alt = '';
+      b.append(im);
+      b.onclick = () => show(j, j > at ? 1 : -1);
+      return b;
+    }));
+    const i = list.indexOf(t);
+    lbImg.src = t.dataset.full!;
+    lbImg.decode().catch(() => {}).finally(() =>
+      zoom(t.querySelector('.ph')!, lbImg, () => { lb.showModal(); show(i); lenis?.stop(); })
+    );
+  });
+  const closeLb = () => {
+    if (!lb.open || busy) return;
+    const box = list[at].querySelector<HTMLElement>('.ph')!;
+    zoom(lbImg, box, () => { lb.close(); lenis?.start(); });
+  };
+  lb.addEventListener('cancel', (e) => { e.preventDefault(); closeLb(); });
+  lb.querySelector('.lb-close')!.addEventListener('click', closeLb);
+  lb.querySelector('.lb-stage')!.addEventListener('click', (e) => e.target === e.currentTarget && closeLb());
+  lb.querySelector('.lb-prev')!.addEventListener('click', () => show(at - 1, -1));
+  lb.querySelector('.lb-next')!.addEventListener('click', () => show(at + 1, 1));
+  lb.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') show(at - 1, -1);
+    if (e.key === 'ArrowRight') show(at + 1, 1);
+  });
+  let x0 = 0;
+  lb.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+  lb.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 50) show(at + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+  });
+</script>
