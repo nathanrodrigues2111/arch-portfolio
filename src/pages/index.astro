@@ -84,11 +84,10 @@ const css = projects.map(({ id }) => [
   <dialog class="lightbox" aria-label="Project gallery">
     <div class="lb-bar"><span class="lb-title"></span><span class="lb-count muted"></span><button class="lb-btn lb-close">Close</button></div>
     <div class="lb-stage" tabindex="-1" autofocus>
-      <img alt="" />
+      <div class="lb-flow"></div>
       <button class="lb-btn lb-prev" aria-label="Previous image">&larr;</button>
       <button class="lb-btn lb-next" aria-label="Next image">&rarr;</button>
     </div>
-    <div class="lb-thumbs"></div>
   </dialog>
 </Base>
 
@@ -226,79 +225,89 @@ const css = projects.map(({ id }) => [
   addEventListener('hashchange', () => open(true));
   addEventListener('keydown', (e) => e.key === 'Escape' && current() && !lb.open && (location.hash = ''));
 
-  // Lightbox gallery inside an open project. Native <dialog> handles Esc and focus.
+  // Lightbox: 3D coverflow of the open project's images. Native <dialog> handles Esc and focus.
   const lb = document.querySelector<HTMLDialogElement>('.lightbox')!;
-  const lbImg = lb.querySelector<HTMLImageElement>('.lb-stage img')!;
-  const lbThumbs = lb.querySelector<HTMLElement>('.lb-thumbs')!;
+  const flow = lb.querySelector<HTMLElement>('.lb-flow')!;
   let list: HTMLElement[] = [];
+  let items: HTMLImageElement[] = [];
   let at = 0;
-  const show = (i: number, dir = 0) => {
-    at = (i + list.length) % list.length;
-    const t = list[at];
-    lbImg.className = dir > 0 ? 'out-r' : dir < 0 ? 'out-l' : '';
-    lbImg.src = t.dataset.full!;
-    lbImg.alt = t.querySelector('img')!.alt;
-    lbImg.decode().catch(() => {}).finally(() => requestAnimationFrame(() => (lbImg.className = '')));
-    [at + 1, at - 1].forEach((j) => (new Image().src = list[(j + list.length) % list.length].dataset.full!));
-    lb.querySelector('.lb-count')!.textContent = `${at + 1} / ${list.length}`;
-    lbThumbs.querySelectorAll('button').forEach((b, j) => {
-      b.setAttribute('aria-current', String(j === at));
-      if (j === at) b.scrollIntoView({ block: 'nearest', inline: 'center' });
+  const show = (i: number) => {
+    at = Math.max(0, Math.min(list.length - 1, i));
+    items.forEach((el, j) => {
+      const o = j - at;
+      el.style.setProperty('--o', String(o));
+      el.style.setProperty('--a', String(Math.abs(o)));
+      el.classList.toggle('on', o === 0);
+      el.tabIndex = o === 0 ? -1 : 0;
     });
+    flow.classList.remove('spin'); void flow.offsetWidth; flow.classList.add('spin');
+    lb.querySelector('.lb-count')!.textContent = `${at + 1} / ${list.length}`;
+    lb.querySelector<HTMLButtonElement>('.lb-prev')!.disabled = at === 0;
+    lb.querySelector<HTMLButtonElement>('.lb-next')!.disabled = at === list.length - 1;
   };
-  // One image zooms between its tile and the lightbox: tile box is named in the old state, lightbox image in the new.
-  const zoom = (fromEl: HTMLElement, toEl: HTMLElement, update: () => void) => {
+  // One image zooms between its tile and the front of the coverflow.
+  const zoom = (fromEl: HTMLElement, toEl: () => HTMLElement, update: () => void) => {
     if (!canMorph || busy) return update();
     busy = true;
+    root.classList.add('vt-lb');
     fromEl.style.viewTransitionName = 'zoom';
+    let target: HTMLElement;
     const vt = document.startViewTransition(() => {
       fromEl.style.viewTransitionName = '';
-      toEl.style.viewTransitionName = 'zoom';
       update();
+      target = toEl();
+      target.style.viewTransitionName = 'zoom';
     });
-    vt.finished.finally(() => { toEl.style.viewTransitionName = ''; busy = false; });
+    vt.finished.finally(() => { if (target) target.style.viewTransitionName = ''; root.classList.remove('vt-lb'); busy = false; });
   };
   grid.addEventListener('click', (e) => {
     const t = (e.target as HTMLElement).closest<HTMLElement>('.tile');
     if (!t || !current()) return;
     e.preventDefault();
     if (lb.open || busy) return;
-    list = [...grid.querySelectorAll<HTMLElement>(`.tile[data-p="${CSS.escape(current())}"]`)];
-    lb.querySelector('.lb-title')!.textContent = document.querySelector(`.pinfo[data-id="${CSS.escape(current())}"] h2`)!.textContent;
-    lbThumbs.replaceChildren(...list.map((x, j) => {
-      const b = document.createElement('button');
-      b.setAttribute('aria-label', `Image ${j + 1}`);
+    const id = current();
+    list = [...grid.querySelectorAll<HTMLElement>(`.tile[data-p="${CSS.escape(id)}"]`)];
+    lb.querySelector('.lb-title')!.textContent = document.querySelector(`.pinfo[data-id="${CSS.escape(id)}"] h2`)!.textContent;
+    items = list.map((x, j) => {
       const im = document.createElement('img');
-      im.src = x.querySelector('img')!.currentSrc;
-      im.alt = '';
-      b.append(im);
-      b.onclick = () => show(j, j > at ? 1 : -1);
-      return b;
-    }));
+      im.src = x.dataset.full!;
+      im.alt = x.querySelector('img')!.alt;
+      im.onclick = () => j !== at && show(j);
+      im.onkeydown = (ev) => ev.key === 'Enter' && show(j);
+      return im;
+    });
+    flow.replaceChildren(...items);
     const i = list.indexOf(t);
-    lbImg.src = t.dataset.full!;
-    lbImg.decode().catch(() => {}).finally(() =>
-      zoom(t.querySelector('.ph')!, lbImg, () => { lb.showModal(); show(i); lenis?.stop(); })
+    items[i].decode().catch(() => {}).finally(() =>
+      zoom(t.querySelector('.ph')!, () => items[at], () => { lb.showModal(); show(i); lenis?.stop(); })
     );
   });
   const closeLb = () => {
     if (!lb.open || busy) return;
     const box = list[at].querySelector<HTMLElement>('.ph')!;
-    zoom(lbImg, box, () => { lb.close(); lenis?.start(); });
+    zoom(items[at], () => box, () => { lb.close(); lenis?.start(); });
   };
   lb.addEventListener('cancel', (e) => { e.preventDefault(); closeLb(); });
   lb.querySelector('.lb-close')!.addEventListener('click', closeLb);
-  lb.querySelector('.lb-stage')!.addEventListener('click', (e) => e.target === e.currentTarget && closeLb());
-  lb.querySelector('.lb-prev')!.addEventListener('click', () => show(at - 1, -1));
-  lb.querySelector('.lb-next')!.addEventListener('click', () => show(at + 1, 1));
+  lb.querySelector('.lb-stage')!.addEventListener('click', (e) => (e.target === e.currentTarget || e.target === flow) && closeLb());
+  lb.querySelector('.lb-prev')!.addEventListener('click', () => show(at - 1));
+  lb.querySelector('.lb-next')!.addEventListener('click', () => show(at + 1));
   lb.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') show(at - 1, -1);
-    if (e.key === 'ArrowRight') show(at + 1, 1);
+    if (e.key === 'ArrowLeft') show(at - 1);
+    if (e.key === 'ArrowRight') show(at + 1);
   });
+  // Swipe and trackpad side-scroll.
   let x0 = 0;
   lb.addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
   lb.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 50) show(at + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+    if (Math.abs(dx) > 50) show(at + (dx < 0 ? 1 : -1));
   });
+  let wheelLock = 0;
+  lb.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(d) < 20 || performance.now() < wheelLock) return;
+    wheelLock = performance.now() + 450;
+    show(at + (d > 0 ? 1 : -1));
+  }, { passive: true });
 </script>
