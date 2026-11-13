@@ -7,7 +7,7 @@ import site from '../site.json';
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const rendered = await Promise.all(projects.map(async (p) => ({ p, Content: (await render(p)).Content })));
 const tiles = await Promise.all(
-  projects.flatMap((p) => p.data.images.map(async (img, i) => ({ p, img, i, full: (await getImage({ src: img, width: 2400, format: 'webp' })).src })))
+  projects.flatMap((p) => p.data.images.map(async (img, i) => ({ p, img, i, full: (await getImage({ src: img, width: 1600, format: 'webp' })).src })))
 );
 
 // Per-project rules: hover keeps that project bright; open shows only its tiles and its info.
@@ -240,7 +240,6 @@ const css = projects.map(({ id }) => [
       el.classList.toggle('on', o === 0);
       el.tabIndex = o === 0 ? -1 : 0;
     });
-    flow.classList.remove('spin'); void flow.offsetWidth; flow.classList.add('spin');
     lb.querySelector('.lb-count')!.textContent = `${at + 1} / ${list.length}`;
     lb.querySelector<HTMLButtonElement>('.lb-prev')!.disabled = at === 0;
     lb.querySelector<HTMLButtonElement>('.lb-next')!.disabled = at === list.length - 1;
