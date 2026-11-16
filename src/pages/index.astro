@@ -45,7 +45,7 @@ const css = projects.map(({ id }) => [
         </div>
         <div class="contact">
           <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
-          <p class="links muted">{site.social.map((s) => <a href={s.url} target="_blank" rel="noopener">{s.label}</a>)}</p>
+          <p class="links muted">{site.social.map((s) => <a href={s.url} target="_blank" rel="noopener">{s.label}</a>)}<button class="theme" type="button" aria-label="Switch colour theme">Light</button></p>
         </div>
       </div>
 
@@ -201,6 +201,21 @@ const css = projects.map(({ id }) => [
     };
     requestAnimationFrame(frame);
   }
+
+  // Light / dark: device setting by default; the button stores an explicit choice.
+  const themeBtn = document.querySelector<HTMLButtonElement>('.theme')!;
+  const isDark = () => (root.dataset.theme ?? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')) === 'dark';
+  const label = () => (themeBtn.textContent = isDark() ? 'Light' : 'Dark');
+  label();
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', label);
+  themeBtn.onclick = () => {
+    const next = isDark() ? 'light' : 'dark';
+    root.classList.add('theming');
+    root.dataset.theme = next;
+    localStorage.setItem('theme', next);
+    label();
+    setTimeout(() => root.classList.remove('theming'), 450);
+  };
 
   // Grid / Gallery: fade out, relayout, fade back in. No cross-flying images.
   const btns = document.querySelectorAll<HTMLButtonElement>('.toggle button');

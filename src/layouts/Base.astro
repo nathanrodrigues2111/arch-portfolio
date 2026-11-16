@@ -11,6 +11,9 @@ const title = [name, role].filter(Boolean).join(', ');
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>try{const t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch{}</script>
+    <meta name="theme-color" content="#0d0d0c" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)" />
     <title>{title}</title>
     <meta name="description" content={intro} />
     <link rel="preload" href={satoshi} as="font" type="font/woff2" crossorigin />

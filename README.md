@@ -44,3 +44,13 @@ Later code changes: `EMDASH_SITE_URL=https://<your-site> npm run deploy`. Conten
 - Data loading: `src/lib/data.ts`
 - Page: `src/pages/index.astro`, styles `src/styles/global.css`
 - Cloudflare config: `wrangler.jsonc`, `astro.config.mjs`
+
+## GitHub Pages preview (static, no editor)
+
+GitHub Pages can't run the editor, so it gets a static snapshot of the current site from the `gh-pages` branch.
+
+```bash
+EMDASH_SITE_URL=http://localhost:4330 npm run build && npx astro preview --port 4330 &
+python3 -I scripts/pages-snapshot.py http://localhost:4330 dist/client /tmp/pages /arch-portfolio
+# then force-push /tmp/pages as the gh-pages branch
+```
