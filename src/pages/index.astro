@@ -210,11 +210,11 @@ const css = projects.map(({ id }) => [
   matchMedia('(prefers-color-scheme: light)').addEventListener('change', label);
   themeBtn.onclick = () => {
     const next = isDark() ? 'light' : 'dark';
-    root.classList.add('theming');
-    root.dataset.theme = next;
+    const apply = () => { root.dataset.theme = next; label(); };
     localStorage.setItem('theme', next);
-    label();
-    setTimeout(() => root.classList.remove('theming'), 450);
+    if (reduce || !document.startViewTransition || busy) return apply();
+    root.classList.add('vt-theme');
+    document.startViewTransition(apply).finished.finally(() => root.classList.remove('vt-theme'));
   };
 
   // Grid / Gallery: fade out, relayout, fade back in. No cross-flying images.
