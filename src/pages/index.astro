@@ -79,7 +79,7 @@ const css = projects.map(({ id }) => [
           >
             <div class="cap"><b>{i === 0 ? p.title : ''}</b><span>{i === 0 ? p.year : i + 1}</span></div>
             <div class="ph">
-              <Image image={img} alt={img.alt || `${p.title}, image ${i + 1}`} sizes={i === 0 ? '(max-width: 800px) 92vw, 72vw' : '(max-width: 800px) 92vw, 36vw'} priority={n < 12} />
+              <Image image={img.id ? img : full} alt={img.alt || `${p.title}, image ${i + 1}`} sizes={i === 0 ? '(max-width: 800px) 92vw, 72vw' : '(max-width: 800px) 92vw, 36vw'} priority={n < 12} />
             </div>
           </a>
         ))}

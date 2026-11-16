@@ -2,7 +2,7 @@
 import cloudflare from '@astrojs/cloudflare';
 import { cacheCloudflare } from '@astrojs/cloudflare/cache';
 import react from '@astrojs/react';
-import { d1, r2 } from '@emdash-cms/cloudflare';
+import { d1 } from '@emdash-cms/cloudflare';
 import { defineConfig } from 'astro/config';
 import emdash from 'emdash/astro';
 
@@ -19,12 +19,15 @@ export default defineConfig({
   cache: { provider: cacheCloudflare() },
   // Resized photos: cached at the edge so visitors never wait on a resize. New photos get new URLs;
   // "Replace photo" purges this cache (src/middleware.ts), so every publish shows up straight away.
+  // Photo links from these hosts get resized too; links from other hosts are shown as they are.
+  image: { domains: ['raw.githubusercontent.com', 'lh3.googleusercontent.com'] },
   routeRules: { '/_image': { maxAge: 86400, swr: 604800 } },
   integrations: [
     react(),
     emdash({
       database: d1({ binding: 'DB', session: 'auto', coalesce: true }),
-      storage: r2({ binding: 'MEDIA' }),
+      // ponytail: no storage while R2 is off (needs a card), so uploads fail and photo links are used.
+      // Switch to storage: r2({ binding: 'MEDIA' }) or s3() on Backblaze B2 when storage is available.
       admin: {
         siteName: 'Portfolio editor',
         footerLabel: false,

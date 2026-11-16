@@ -1,11 +1,10 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "arch-portfolio",
+  "name": "spatialdiscourse",
   "main": "./src/worker.ts",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "arch-portfolio" }],
-  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "arch-portfolio-media" }],
+  "d1_databases": [{ "binding": "DB", "database_name": "spatialdiscourse", "database_id": "db16a8ed-9891-4c75-a214-8adefbccc8de" }],
   // Scheduled publishing and maintenance.
   "triggers": { "crons": ["*/15 * * * *"] }
 }

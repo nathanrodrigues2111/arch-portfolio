@@ -76,16 +76,19 @@
           "slug": "photos",
           "label": "Photos (the first one is the cover)",
           "type": "repeater",
-          "required": true,
+          "required": false,
           "validation": {
-            "minItems": 1,
             "maxItems": 40,
             "subFields": [
               {
                 "slug": "image",
-                "label": "Photo",
-                "type": "image",
-                "required": true
+                "label": "Upload",
+                "type": "image"
+              },
+              {
+                "slug": "link",
+                "label": "Or a link. Use upload or link, not both. Paste a public image link. Google Drive works if the file is shared as 'Anyone with the link'.",
+                "type": "url"
               }
             ]
           }
@@ -121,6 +124,11 @@
           "slug": "photo",
           "label": "Profile photo (optional, leave empty to hide)",
           "type": "image"
+        },
+        {
+          "slug": "photo_link",
+          "label": "Profile photo link (used when no photo is uploaded). Paste a public image link. Google Drive works if the file is shared as 'Anyone with the link'.",
+          "type": "url"
         },
         {
           "slug": "role",
@@ -264,13 +272,7 @@
               "url": "https://instagram.com/"
             }
           ],
-          "photo": {
-            "$media": {
-              "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/1ecbf8b/seed/media/pamelina-pereira.jpg",
-              "alt": "Pamelina Pereira",
-              "filename": "pamelina-pereira.jpg"
-            }
-          }
+          "photo_link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/1ecbf8b/seed/media/pamelina-pereira.jpg"
         }
       }
     ],
@@ -287,35 +289,6 @@
           "area": "18,000 m²",
           "project_status": "In progress",
           "position": 4,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/1.jpg",
-                  "alt": "Atrium Tower, image 1",
-                  "filename": "atrium-tower-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/2.jpg",
-                  "alt": "Atrium Tower, image 2",
-                  "filename": "atrium-tower-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/3.jpg",
-                  "alt": "Atrium Tower, image 3",
-                  "filename": "atrium-tower-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -328,6 +301,17 @@
                   "text": "Twenty-two floors of workspace wrapped around a vertical garden. The atrium works as the building's lungs, venting warm air up and out through the crown."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/atrium-tower/3.jpg"
             }
           ]
         }
@@ -344,35 +328,6 @@
           "area": "640 m²",
           "project_status": "Completed",
           "position": 1,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/1.jpg",
-                  "alt": "Casa del Mar, image 1",
-                  "filename": "casa-del-mar-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/2.jpg",
-                  "alt": "Casa del Mar, image 2",
-                  "filename": "casa-del-mar-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/3.jpg",
-                  "alt": "Casa del Mar, image 3",
-                  "filename": "casa-del-mar-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -385,6 +340,17 @@
                   "text": "A weekend house set into the dunes. Long concrete walls frame the sea and hold back the wind, while a shaded courtyard keeps the rooms cool through the afternoon."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/casa-del-mar/3.jpg"
             }
           ]
         }
@@ -401,35 +367,6 @@
           "area": "2,100 m²",
           "project_status": "Completed",
           "position": 3,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/1.jpg",
-                  "alt": "Concrete Library, image 1",
-                  "filename": "concrete-library-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/2.jpg",
-                  "alt": "Concrete Library, image 2",
-                  "filename": "concrete-library-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/3.jpg",
-                  "alt": "Concrete Library, image 3",
-                  "filename": "concrete-library-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -442,6 +379,17 @@
                   "text": "A public reading room under one folded roof. Skylights pull soft north light deep into the stacks, so most of the day runs without artificial light."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/concrete-library/3.jpg"
             }
           ]
         }
@@ -458,35 +406,6 @@
           "area": "180 m²",
           "project_status": "Completed",
           "position": 5,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/1.jpg",
-                  "alt": "Lantern Pavilion, image 1",
-                  "filename": "lantern-pavilion-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/2.jpg",
-                  "alt": "Lantern Pavilion, image 2",
-                  "filename": "lantern-pavilion-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/3.jpg",
-                  "alt": "Lantern Pavilion, image 3",
-                  "filename": "lantern-pavilion-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -499,6 +418,17 @@
                   "text": "A timber and glass pavilion for small gatherings. By day it reads as a quiet frame in the garden. At night it glows like a lantern."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/lantern-pavilion/3.jpg"
             }
           ]
         }
@@ -515,35 +445,6 @@
           "area": "300 m²",
           "project_status": "Completed",
           "position": 6,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/1.jpg",
-                  "alt": "North Studio, image 1",
-                  "filename": "north-studio-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/2.jpg",
-                  "alt": "North Studio, image 2",
-                  "filename": "north-studio-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/3.jpg",
-                  "alt": "North Studio, image 3",
-                  "filename": "north-studio-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -556,6 +457,17 @@
                   "text": "A small studio for a design practice. One long table, one long window, and a sawtooth roof that keeps the light even across every desk."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/north-studio/3.jpg"
             }
           ]
         }
@@ -572,35 +484,6 @@
           "area": "420 m²",
           "project_status": "Completed",
           "position": 2,
-          "photos": [
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/1.jpg",
-                  "alt": "Ridge House, image 1",
-                  "filename": "ridge-house-1.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/2.jpg",
-                  "alt": "Ridge House, image 2",
-                  "filename": "ridge-house-2.jpg"
-                }
-              }
-            },
-            {
-              "image": {
-                "$media": {
-                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/3.jpg",
-                  "alt": "Ridge House, image 3",
-                  "filename": "ridge-house-3.jpg"
-                }
-              }
-            }
-          ],
           "description": [
             {
               "_type": "block",
@@ -613,6 +496,17 @@
                   "text": "Built along the line of the hill, the house steps down in three levels. Each floor opens to the valley on one side and a planted terrace on the other."
                 }
               ]
+            }
+          ],
+          "photos": [
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/1.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/2.jpg"
+            },
+            {
+              "link": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/0bd70f6/src/content/projects/ridge-house/3.jpg"
             }
           ]
         }

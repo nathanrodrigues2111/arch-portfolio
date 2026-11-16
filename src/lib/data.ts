@@ -3,6 +3,15 @@ import { getEmDashCollection } from 'emdash';
 type Img = { id: string; src?: string; alt?: string; width?: number; height?: number; meta?: { storageKey?: string } };
 type Item = { item: string };
 
+/** Google Drive share links (/file/d/<ID>/... or ?id=<ID>) become a direct image URL; other links pass through. */
+export const directImageUrl = (url: string) => {
+  const id = /drive\.google\.com\/(?:file\/d\/|open\?(?:.*&)?id=|uc\?(?:.*&)?id=)([\w-]+)/.exec(url)?.[1];
+  return id ? `https://lh3.googleusercontent.com/d/${id}` : url;
+};
+/** An uploaded photo if there is one, else the pasted link. */
+const pick = (image?: Img, link?: string, alt = ''): Img | null =>
+  image?.id ? image : link?.trim() ? { id: '', src: directImageUrl(link.trim()), alt } : null;
+
 /** The single "About me" entry. Falls back to empty values so the page never crashes mid-edit. */
 export async function getProfile() {
   const { entries, cacheHint } = await getEmDashCollection('profile', { status: 'published', limit: 1, orderBy: { created_at: 'asc' } });
@@ -10,7 +19,7 @@ export async function getProfile() {
   return {
     cacheHint,
     name: d.title ?? '',
-    photo: (d.photo?.id ? d.photo : null) as Img | null,
+    photo: pick(d.photo, d.photo_link, d.title),
     role: d.role ?? '',
     city: d.city ?? '',
     timezone: d.timezone || 'Asia/Kolkata',
@@ -38,7 +47,8 @@ export async function getProjects() {
         area: d.area as string | undefined,
         status: d.project_status as string | undefined,
         description: d.description,
-        photos: ((d.photos ?? []) as { image?: Img }[]).map((p) => p.image).filter((i): i is Img => !!i?.id),
+        // Each photo is an upload or a link; list order is display order.
+        photos: ((d.photos ?? []) as { image?: Img; link?: string }[]).map((p) => pick(p.image, p.link)).filter((i): i is Img => !!i),
       };
     })
     .filter((p) => p.photos.length > 0);
