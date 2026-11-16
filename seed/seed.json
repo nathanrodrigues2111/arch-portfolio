@@ -263,7 +263,14 @@
               "label": "Instagram",
               "url": "https://instagram.com/"
             }
-          ]
+          ],
+          "photo": {
+            "$media": {
+              "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/1ecbf8b/seed/media/pamelina-pereira.jpg",
+              "alt": "Pamelina Pereira",
+              "filename": "pamelina-pereira.jpg"
+            }
+          }
         }
       }
     ],
