@@ -25,6 +25,19 @@ export default defineConfig({
   integrations: [
     react(),
     emdash({
+      // Username + password sign-in (src/auth/) instead of passkeys. The login route replaces EmDash's login page.
+      authProviders: [
+        {
+          id: 'password',
+          label: 'Password',
+          routes: [
+            { pattern: '/_emdash/admin/login', entrypoint: './src/auth/login.astro' },
+            { pattern: '/_emdash/admin/passwords', entrypoint: './src/auth/passwords.astro' },
+            { pattern: '/_emdash/api/auth/login', entrypoint: './src/auth/login-api.ts' },
+            { pattern: '/_emdash/api/passwords', entrypoint: './src/auth/passwords-api.ts' },
+          ],
+        },
+      ],
       database: d1({ binding: 'DB', session: 'auto', coalesce: true }),
       // ponytail: no storage while R2 is off (needs a card), so uploads fail and photo links are used.
       // Switch to storage: r2({ binding: 'MEDIA' }) or s3() on Backblaze B2 when storage is available.

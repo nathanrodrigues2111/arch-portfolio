@@ -4,7 +4,9 @@ Astro site with a built-in editor ([EmDash](https://github.com/emdash-cms/emdash
 
 ## Editing (for the site owner)
 
-Go to `https://<your-site>/_emdash/admin` and sign in.
+Go to `https://<your-site>/_emdash/admin` and sign in with your username (or email) and password.
+
+- **Passwords**: `https://<your-site>/_emdash/admin/passwords` changes your own password. Admins also add accounts there (pick Editor for someone who only edits content) and reset other people's passwords.
 
 - **Projects**: add, edit or remove a project. Each photo is either an upload or a pasted image link (Google Drive works if the file is shared as "Anyone with the link"), not both. Drag photos to reorder them; the first photo is the cover. Uploading does not work until R2 is on (see below). "Position on the page" sets the order on the home page (1 shows first).
 - **About me**: name, intro, services, awards, email and social links on the left side.
@@ -25,10 +27,24 @@ https://spatialdiscourse.pages.dev. The `spatialdiscourse` Worker runs the site 
 
 - Code changes: `EMDASH_SITE_URL=https://spatialdiscourse.pages.dev npm run deploy` (without it photos ship full size).
 - Proxy changes: copy `pages-proxy/` outside the repo (wrangler otherwise picks up the main build config), then run `npx wrangler pages deploy --branch main --force` there.
-- First setup: open `/_emdash/admin`, the setup wizard creates the admin with a passkey (starter content is already loaded). Then invite the owner in **Users** as **Editor** and remove the default Categories and Tags (signed in as admin, in the browser console on the admin page):
+- Setup is already complete; no setup wizard. To remove the default Categories and Tags (signed in as admin, in the browser console on the admin page):
   ```js
   for (const t of ['category', 'tag']) await fetch(`/_emdash/api/taxonomies/${t}`, { method: 'DELETE', headers: { 'X-EmDash-Request': '1' } });
   ```
+
+### Sign-in
+
+Username + password replaces EmDash's passkey login (`src/auth/`, wired as an `authProviders` entry in `astro.config.mjs`; `/_emdash/admin/login` is our own page). Passwords are PBKDF2-SHA256 hashes (100k iterations, the Workers maximum, random salt) in the D1 table `user_passwords`; the session is EmDash's own cookie. 5 wrong passwords for one username (or 20 from one IP) lock sign-in for up to 15 minutes. Check the hashing with `node scripts/check-password.ts`.
+
+Locked out or forgot the password:
+
+```bash
+# Clear the lockout
+npx wrangler d1 execute spatialdiscourse --remote --command "DELETE FROM _emdash_rate_limits WHERE key LIKE 'pwlogin:%'"
+# Set a new password: make a hash locally, then store it
+node -e "import('./src/lib/password.ts').then(m => m.hashPassword(process.argv[1])).then(console.log)" 'new-password-here'
+npx wrangler d1 execute spatialdiscourse --remote --command "UPDATE user_passwords SET hash = '<hash from above>' WHERE username = 'pamelina'"
+```
 
 ### Turning on photo uploads (R2)
 

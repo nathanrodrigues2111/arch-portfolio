@@ -1,0 +1,59 @@
+---
+// Replaces EmDash's passkey login page with a plain username + password form.
+export const prerender = false;
+const redirect = Astro.url.searchParams.get('redirect') ?? '';
+const target = redirect.startsWith('/') && !redirect.startsWith('//') ? redirect : '/_emdash/admin';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Sign in</title>
+    <style>
+      :root { color-scheme: light dark; --bg: #f6f6f4; --card: #fff; --text: #1a1a1a; --muted: #666; --line: #d8d8d4; --accent: #1a1a1a; --accent-text: #fff; --err: #b3261e; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #141414; --card: #1e1e1e; --text: #eee; --muted: #aaa; --line: #3a3a3a; --accent: #eee; --accent-text: #111; --err: #ff8a80; } }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, sans-serif; }
+      form { width: 100%; max-width: 360px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 28px; display: grid; gap: 14px; }
+      h1 { margin: 0 0 6px; font-size: 22px; font-weight: 600; }
+      label { display: grid; gap: 6px; font-size: 14px; }
+      input { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: inherit; }
+      button { font: inherit; font-weight: 600; padding: 11px; border: 0; border-radius: 6px; background: var(--accent); color: var(--accent-text); cursor: pointer; }
+      button:disabled { opacity: 0.6; }
+      #error { color: var(--err); font-size: 14px; margin: 0; min-height: 1.5em; }
+    </style>
+  </head>
+  <body>
+    <form id="login" data-target={target}>
+      <h1>Sign in</h1>
+      <label>Username or email <input name="username" autocomplete="username" autocapitalize="none" required autofocus /></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required /></label>
+      <p id="error" role="alert"></p>
+      <button type="submit">Sign in</button>
+    </form>
+    <script>
+      const form = document.getElementById('login') as HTMLFormElement;
+      const error = document.getElementById('error')!;
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const button = form.querySelector('button')!;
+        button.disabled = true;
+        error.textContent = '';
+        try {
+          const res = await fetch('/_emdash/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-EmDash-Request': '1' },
+            body: JSON.stringify(Object.fromEntries(new FormData(form))),
+          });
+          if (res.ok) return location.assign(form.dataset.target!);
+          error.textContent = (await res.json().catch(() => null))?.error ?? 'Sign in failed.';
+        } catch {
+          error.textContent = 'Network error. Try again.';
+        }
+        button.disabled = false;
+      });
+    </script>
+  </body>
+</html>
