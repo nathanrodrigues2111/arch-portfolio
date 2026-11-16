@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arch-portfolio",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [{ "binding": "DB", "database_name": "arch-portfolio" }],
+  "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "arch-portfolio-media" }],
+  // Scheduled publishing and maintenance.
+  "triggers": { "crons": ["*/15 * * * *"] }
+}

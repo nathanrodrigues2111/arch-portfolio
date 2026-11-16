@@ -1,0 +1,610 @@
+{
+  "$schema": "https://emdashcms.com/seed.schema.json",
+  "version": "1",
+  "meta": {
+    "name": "Pamelina Pereira",
+    "description": "Architecture portfolio"
+  },
+  "settings": {
+    "title": "Pamelina Pereira",
+    "tagline": "Architecture and interiors. Quiet buildings shaped by light, material and climate.",
+    "timezone": "Asia/Kolkata"
+  },
+  "collections": [
+    {
+      "slug": "projects",
+      "label": "Projects",
+      "labelSingular": "Project",
+      "description": "Each project shows on the home page. Lower position numbers show first.",
+      "admin": {
+        "listColumns": [
+          "year",
+          "position"
+        ]
+      },
+      "sortOrder": 1,
+      "urlPattern": "/#{slug}",
+      "supports": [
+        "drafts",
+        "revisions"
+      ],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Project name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "location",
+          "label": "Location (City, Country)",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "year",
+          "label": "Year",
+          "type": "string",
+          "required": true,
+          "validation": {
+            "pattern": "^[0-9]{4}$"
+          }
+        },
+        {
+          "slug": "type",
+          "label": "Type (for example Residential)",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "area",
+          "label": "Area (for example 18,000 m²). Leave empty to hide",
+          "type": "string"
+        },
+        {
+          "slug": "project_status",
+          "label": "Status (for example Completed). Leave empty to hide",
+          "type": "string"
+        },
+        {
+          "slug": "position",
+          "label": "Position on the page (1 shows first)",
+          "type": "integer",
+          "required": true
+        },
+        {
+          "slug": "photos",
+          "label": "Photos (the first one is the cover)",
+          "type": "repeater",
+          "required": true,
+          "validation": {
+            "minItems": 1,
+            "maxItems": 40,
+            "subFields": [
+              {
+                "slug": "image",
+                "label": "Photo",
+                "type": "image",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "slug": "description",
+          "label": "Description",
+          "type": "portableText"
+        }
+      ]
+    },
+    {
+      "slug": "profile",
+      "label": "About me",
+      "labelSingular": "About me",
+      "description": "Your name, intro, services, awards and contact details on the left side of the site. There is only one of these, just edit it.",
+      "admin": {
+        "quickCreate": false
+      },
+      "sortOrder": 2,
+      "routable": false,
+      "supports": [
+        "revisions"
+      ],
+      "fields": [
+        {
+          "slug": "title",
+          "label": "Your name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "slug": "role",
+          "label": "Role (for example Architect)",
+          "type": "string"
+        },
+        {
+          "slug": "city",
+          "label": "City",
+          "type": "string"
+        },
+        {
+          "slug": "timezone",
+          "label": "Time zone for the clock",
+          "type": "select",
+          "validation": {
+            "options": [
+              "Asia/Kolkata",
+              "Asia/Dubai",
+              "Europe/London",
+              "Europe/Lisbon",
+              "America/New_York"
+            ]
+          }
+        },
+        {
+          "slug": "availability",
+          "label": "Availability (for example Open for new projects)",
+          "type": "string"
+        },
+        {
+          "slug": "intro",
+          "label": "Short intro",
+          "type": "text"
+        },
+        {
+          "slug": "services",
+          "label": "Services",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "item",
+                "label": "Service",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "slug": "recognition",
+          "label": "Awards and press",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "item",
+                "label": "Award or press mention",
+                "type": "string",
+                "required": true
+              }
+            ]
+          }
+        },
+        {
+          "slug": "email",
+          "label": "Email",
+          "type": "string"
+        },
+        {
+          "slug": "social",
+          "label": "Social links",
+          "type": "repeater",
+          "validation": {
+            "subFields": [
+              {
+                "slug": "label",
+                "label": "Name (for example Instagram)",
+                "type": "string",
+                "required": true
+              },
+              {
+                "slug": "url",
+                "label": "Link",
+                "type": "url",
+                "required": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "content": {
+    "profile": [
+      {
+        "id": "me",
+        "slug": "me",
+        "status": "published",
+        "data": {
+          "title": "Pamelina Pereira",
+          "role": "Architect",
+          "city": "Mumbai",
+          "timezone": "Asia/Kolkata",
+          "availability": "Open for new projects",
+          "intro": "Architecture and interiors. Quiet buildings shaped by light, material and climate.",
+          "services": [
+            {
+              "item": "Architecture"
+            },
+            {
+              "item": "Interior design"
+            },
+            {
+              "item": "Residential"
+            },
+            {
+              "item": "Concept and visualisation"
+            }
+          ],
+          "recognition": [
+            {
+              "item": "Placeholder award (2025)"
+            },
+            {
+              "item": "Placeholder feature (2024)"
+            },
+            {
+              "item": "Placeholder shortlist (2023)"
+            }
+          ],
+          "email": "studio@example.com",
+          "social": [
+            {
+              "label": "LinkedIn",
+              "url": "https://in.linkedin.com/in/pamelina-pereira-069212216"
+            },
+            {
+              "label": "Instagram",
+              "url": "https://instagram.com/"
+            }
+          ]
+        }
+      }
+    ],
+    "projects": [
+      {
+        "id": "atrium-tower",
+        "slug": "atrium-tower",
+        "status": "published",
+        "data": {
+          "title": "Atrium Tower",
+          "location": "Mumbai, India",
+          "year": "2026",
+          "type": "Commercial",
+          "area": "18,000 m²",
+          "project_status": "In progress",
+          "position": 4,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/atrium-tower/1.jpg",
+                  "alt": "Atrium Tower, image 1",
+                  "filename": "atrium-tower-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/atrium-tower/2.jpg",
+                  "alt": "Atrium Tower, image 2",
+                  "filename": "atrium-tower-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/atrium-tower/3.jpg",
+                  "alt": "Atrium Tower, image 3",
+                  "filename": "atrium-tower-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k0",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k1",
+                  "text": "Twenty-two floors of workspace wrapped around a vertical garden. The atrium works as the building's lungs, venting warm air up and out through the crown."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "casa-del-mar",
+        "slug": "casa-del-mar",
+        "status": "published",
+        "data": {
+          "title": "Casa del Mar",
+          "location": "Alibaug, India",
+          "year": "2025",
+          "type": "Residence",
+          "area": "640 m²",
+          "project_status": "Completed",
+          "position": 1,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/casa-del-mar/1.jpg",
+                  "alt": "Casa del Mar, image 1",
+                  "filename": "casa-del-mar-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/casa-del-mar/2.jpg",
+                  "alt": "Casa del Mar, image 2",
+                  "filename": "casa-del-mar-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/casa-del-mar/3.jpg",
+                  "alt": "Casa del Mar, image 3",
+                  "filename": "casa-del-mar-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k2",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k3",
+                  "text": "A weekend house set into the dunes. Long concrete walls frame the sea and hold back the wind, while a shaded courtyard keeps the rooms cool through the afternoon."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "concrete-library",
+        "slug": "concrete-library",
+        "status": "published",
+        "data": {
+          "title": "Concrete Library",
+          "location": "Pune, India",
+          "year": "2024",
+          "type": "Cultural",
+          "area": "2,100 m²",
+          "project_status": "Completed",
+          "position": 3,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/concrete-library/1.jpg",
+                  "alt": "Concrete Library, image 1",
+                  "filename": "concrete-library-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/concrete-library/2.jpg",
+                  "alt": "Concrete Library, image 2",
+                  "filename": "concrete-library-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/concrete-library/3.jpg",
+                  "alt": "Concrete Library, image 3",
+                  "filename": "concrete-library-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k4",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k5",
+                  "text": "A public reading room under one folded roof. Skylights pull soft north light deep into the stacks, so most of the day runs without artificial light."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "lantern-pavilion",
+        "slug": "lantern-pavilion",
+        "status": "published",
+        "data": {
+          "title": "Lantern Pavilion",
+          "location": "Goa, India",
+          "year": "2023",
+          "type": "Pavilion",
+          "area": "180 m²",
+          "project_status": "Completed",
+          "position": 5,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/lantern-pavilion/1.jpg",
+                  "alt": "Lantern Pavilion, image 1",
+                  "filename": "lantern-pavilion-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/lantern-pavilion/2.jpg",
+                  "alt": "Lantern Pavilion, image 2",
+                  "filename": "lantern-pavilion-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/lantern-pavilion/3.jpg",
+                  "alt": "Lantern Pavilion, image 3",
+                  "filename": "lantern-pavilion-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k6",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k7",
+                  "text": "A timber and glass pavilion for small gatherings. By day it reads as a quiet frame in the garden. At night it glows like a lantern."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "north-studio",
+        "slug": "north-studio",
+        "status": "published",
+        "data": {
+          "title": "North Studio",
+          "location": "Bengaluru, India",
+          "year": "2022",
+          "type": "Workplace",
+          "area": "300 m²",
+          "project_status": "Completed",
+          "position": 6,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/north-studio/1.jpg",
+                  "alt": "North Studio, image 1",
+                  "filename": "north-studio-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/north-studio/2.jpg",
+                  "alt": "North Studio, image 2",
+                  "filename": "north-studio-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/north-studio/3.jpg",
+                  "alt": "North Studio, image 3",
+                  "filename": "north-studio-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k8",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k9",
+                  "text": "A small studio for a design practice. One long table, one long window, and a sawtooth roof that keeps the light even across every desk."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "ridge-house",
+        "slug": "ridge-house",
+        "status": "published",
+        "data": {
+          "title": "Ridge House",
+          "location": "Lonavala, India",
+          "year": "2024",
+          "type": "Residence",
+          "area": "420 m²",
+          "project_status": "Completed",
+          "position": 2,
+          "photos": [
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/ridge-house/1.jpg",
+                  "alt": "Ridge House, image 1",
+                  "filename": "ridge-house-1.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/ridge-house/2.jpg",
+                  "alt": "Ridge House, image 2",
+                  "filename": "ridge-house-2.jpg"
+                }
+              }
+            },
+            {
+              "image": {
+                "$media": {
+                  "url": "https://raw.githubusercontent.com/nathanrodrigues2111/arch-portfolio/main/src/content/projects/ridge-house/3.jpg",
+                  "alt": "Ridge House, image 3",
+                  "filename": "ridge-house-3.jpg"
+                }
+              }
+            }
+          ],
+          "description": [
+            {
+              "_type": "block",
+              "_key": "k10",
+              "style": "normal",
+              "children": [
+                {
+                  "_type": "span",
+                  "_key": "k11",
+                  "text": "Built along the line of the hill, the house steps down in three levels. Each floor opens to the valley on one side and a planted terrace on the other."
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

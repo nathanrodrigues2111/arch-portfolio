@@ -1,14 +1,17 @@
 ---
-import { Image, getImage } from 'astro:assets';
-import { getCollection, render } from 'astro:content';
+import { Image } from 'emdash/ui';
+import { PortableText } from 'emdash/ui';
 import Base from '../layouts/Base.astro';
-import site from '../site.json';
+import { getImage } from 'astro:assets';
+import { getProfile, getProjects, photoUrl } from '../lib/data';
 
-const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const rendered = await Promise.all(projects.map(async (p) => ({ p, Content: (await render(p)).Content })));
-const tiles = await Promise.all(
-  projects.flatMap((p) => p.data.images.map(async (img, i) => ({ p, img, i, full: (await getImage({ src: img, width: 1600, format: 'webp' })).src })))
-);
+const [site, projects] = await Promise.all([getProfile(), getProjects()]);
+// Lightbox gets a 1600px webp of each photo; falls back to the original if resizing is unavailable.
+const big = async (img: Parameters<typeof photoUrl>[0]) => {
+  const src = new URL(photoUrl(img), Astro.url.origin).href;
+  try { return (await getImage({ src, width: 1600, inferSize: true, format: 'webp' })).src; } catch { return src; }
+};
+const tiles = await Promise.all(projects.flatMap((p) => p.photos.map(async (img, i) => ({ p, img, i, full: await big(img) }))));
 
 // Per-project rules: hover keeps that project bright; open shows only its tiles and its info.
 const css = projects.map(({ id }) => [
@@ -19,7 +22,7 @@ const css = projects.map(({ id }) => [
   // Flying images: each gets a staggered start and one of four 3D tilt arcs, so they move like paper.
   tiles.map((_, i) => `::view-transition-group(m${i}){animation-delay:${Math.min(i * 22, 380)}ms}::view-transition-image-pair(m${i}){animation:tilt-${'abcd'[(i * 7) % 4]} .9s cubic-bezier(.6,0,.25,1) ${Math.min(i * 22, 380)}ms both}`).join('');
 ---
-<Base>
+<Base name={site.name} role={site.role} intro={site.intro}>
   <div class="loader" aria-hidden="true"><span>0%</span></div>
   <style set:html={css}></style>
 
@@ -41,8 +44,8 @@ const css = projects.map(({ id }) => [
       </div>
 
       <!-- one panel per project, shown when that project is open -->
-      {rendered.map(({ p, Content }, n) => {
-        const d = p.data;
+      {projects.map((d, n) => {
+        const p = d;
         const next = projects[(n + 1) % projects.length];
         const meta = [['Location', d.location], ['Year', d.year], ['Type', d.type], ['Area', d.area], ['Status', d.status]].filter(([, v]) => v);
         return (
@@ -50,8 +53,8 @@ const css = projects.map(({ id }) => [
             <a href="#" class="back muted">&larr; All work</a>
             <h2>{d.title}</h2>
             <dl>{meta.map(([k, v]) => <div><dt class="muted">{k}</dt><dd>{v}</dd></div>)}</dl>
-            <div class="body"><Content /></div>
-            <a class="next" href={`#${next.id}`}><span class="muted">Next project</span>{next.data.title}</a>
+            <div class="body"><PortableText value={d.description} /></div>
+            <a class="next" href={`#${next.id}`}><span class="muted">Next project</span>{next.title}</a>
           </article>
         );
       })}
@@ -67,9 +70,9 @@ const css = projects.map(({ id }) => [
             data-first={i === 0 ? "" : undefined}
             data-full={full}
           >
-            <div class="cap"><b>{i === 0 ? p.data.title : ''}</b><span>{i === 0 ? p.data.year : i + 1}</span></div>
+            <div class="cap"><b>{i === 0 ? p.title : ''}</b><span>{i === 0 ? p.year : i + 1}</span></div>
             <div class="ph">
-              <Image src={img} alt={`${p.data.title}, image ${i + 1}`} widths={[500, 900, 1600, 2200]} sizes="(max-width: 800px) 50vw, 40vw" loading={n < 12 ? 'eager' : 'lazy'} />
+              <Image image={img} alt={img.alt || `${p.title}, image ${i + 1}`} sizes="(max-width: 800px) 50vw, 40vw" priority={n < 12} />
             </div>
           </a>
         ))}

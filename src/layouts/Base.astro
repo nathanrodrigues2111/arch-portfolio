@@ -1,8 +1,9 @@
 ---
 import '../styles/global.css';
-import site from '../site.json';
 
-const title = `${site.name}, ${site.role}`;
+interface Props { name: string; role: string; intro: string }
+const { name, role, intro } = Astro.props;
+const title = [name, role].filter(Boolean).join(', ');
 ---
 <!doctype html>
 <html lang="en">
@@ -10,8 +11,8 @@ const title = `${site.name}, ${site.role}`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="description" content={site.intro} />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`.replace("//", "/")} />
+    <meta name="description" content={intro} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <noscript><style>.side>*,.tile{animation:none!important}.loader{display:none}</style></noscript>
   </head>
   <body><slot /></body>
