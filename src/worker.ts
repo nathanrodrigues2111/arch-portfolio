@@ -1,9 +1,16 @@
 import handler, { createScheduledHandler, PluginBridge } from '@emdash-cms/cloudflare/worker';
+import { WorkerEntrypoint } from 'cloudflare:workers';
 
 export { PluginBridge };
 
-// The public site is the Pages proxy (pages-proxy/). Its service binding forwards the pages.dev URL,
-// so only direct visits to the workers.dev URL are redirected.
+// The public site is the Pages proxy (pages-proxy/), bound to the cached Site entrypoint below.
+// The default entrypoint (workers.dev) has the cache off in wrangler.jsonc, so its redirect always runs.
+export class Site extends WorkerEntrypoint {
+  fetch(request: Request) {
+    return handler.fetch!(request, this.env as never, this.ctx);
+  }
+}
+
 const SITE = 'https://spatialdiscourse.pages.dev';
 
 export default {
