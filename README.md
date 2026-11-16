@@ -23,7 +23,7 @@ Site: http://localhost:4321. Editor: open http://localhost:4321/_emdash/api/setu
 
 1. `npx wrangler login`
 2. `EMDASH_SITE_URL=https://<your-site> npm run deploy` (Wrangler creates the D1 database, R2 bucket and KV namespace on first deploy). The site URL must be set at build time or photos are served full size.
-3. Open `https://<your-site>/_emdash/admin`, run the setup wizard, create your admin account with a passkey, and pick **include sample content** so the six projects and their photos are imported. The seed downloads the photos from this GitHub repo once; after that nothing depends on GitHub.
+3. Open `https://<your-site>/_emdash/admin`, run the setup wizard, create your admin account with a passkey, and pick **include sample content** so the six projects and their photos are imported. The seed downloads the photos once from commit 0bd70f6 of this GitHub repo (the repo must be public then); after that nothing depends on GitHub.
 4. In **Users**, invite the site owner by email with the **Editor** role. Editors only see Projects, About me and Media.
 5. Remove the unused default Categories and Tags. Signed in as admin, run this in the browser console on the admin page:
    ```js
