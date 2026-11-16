@@ -37,6 +37,7 @@ const css = projects.map(({ id }) => [
       <!-- default panel -->
       <div class="info">
         <a href="#" class="mark">{site.name}</a>
+        {site.photo && <Image class="portrait" image={site.photo} alt={site.name} width={320} height={320} sizes="160px" priority />}
         <p>{site.role}, {site.city}<br /><span class="muted"><time data-clock data-tz={site.timezone}>--:--</time> local. {site.availability}</span></p>
         <p class="intro">{site.intro}</p>
         <div class="cols">

@@ -10,6 +10,7 @@ export async function getProfile() {
   return {
     cacheHint,
     name: d.title ?? '',
+    photo: (d.photo?.id ? d.photo : null) as Img | null,
     role: d.role ?? '',
     city: d.city ?? '',
     timezone: d.timezone || 'Asia/Kolkata',

@@ -118,6 +118,11 @@
           "required": true
         },
         {
+          "slug": "photo",
+          "label": "Profile photo (optional, leave empty to hide)",
+          "type": "image"
+        },
+        {
           "slug": "role",
           "label": "Role (for example Architect)",
           "type": "string"
