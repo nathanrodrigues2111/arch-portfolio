@@ -22,7 +22,7 @@ Site: http://localhost:4321. Editor: open http://localhost:4321/_emdash/api/setu
 ## Deploy to Cloudflare (first time)
 
 1. `npx wrangler login`
-2. `npm run deploy` (Wrangler creates the D1 database, R2 bucket and KV namespace on first deploy)
+2. `EMDASH_SITE_URL=https://<your-site> npm run deploy` (Wrangler creates the D1 database, R2 bucket and KV namespace on first deploy). The site URL must be set at build time or photos are served full size.
 3. Open `https://<your-site>/_emdash/admin`, run the setup wizard, create your admin account with a passkey, and pick **include sample content** so the six projects and their photos are imported. The seed downloads the photos from this GitHub repo once; after that nothing depends on GitHub.
 4. In **Users**, invite the site owner by email with the **Editor** role. Editors only see Projects, About me and Media.
 5. Remove the unused default Categories and Tags. Signed in as admin, run this in the browser console on the admin page:
@@ -30,7 +30,13 @@ Site: http://localhost:4321. Editor: open http://localhost:4321/_emdash/api/setu
    for (const t of ['category', 'tag']) await fetch(`/_emdash/api/taxonomies/${t}`, { method: 'DELETE', headers: { 'X-EmDash-Request': '1' } });
    ```
 
-Later code changes: `npm run deploy`. Content changes never need a deploy.
+Later code changes: `EMDASH_SITE_URL=https://<your-site> npm run deploy`. Content changes never need a deploy.
+
+## Caching
+
+- Pages are cached at Cloudflare's edge (1 hour, served stale up to a day while refreshing). Publishing purges them immediately.
+- Resized photos are edge-cached for a day. New photos get new URLs; "Replace photo" purges the photo cache (`src/middleware.ts`).
+- Signed-in editors always get fresh, uncached pages.
 
 ## Code map
 

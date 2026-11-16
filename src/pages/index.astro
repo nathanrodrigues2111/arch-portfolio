@@ -5,7 +5,13 @@ import Base from '../layouts/Base.astro';
 import { getImage } from 'astro:assets';
 import { getProfile, getProjects, photoUrl } from '../lib/data';
 
-const [site, projects] = await Promise.all([getProfile(), getProjects()]);
+const [site, { list: projects, cacheHint }] = await Promise.all([getProfile(), getProjects()]);
+// Edge cache: served from Cloudflare for an hour (stale up to a day while it refreshes); publishing purges it right away.
+if (Astro.cache?.enabled) {
+  Astro.cache.set(site.cacheHint);
+  Astro.cache.set(cacheHint);
+  Astro.cache.set({ maxAge: 3600, swr: 86400 });
+}
 // Lightbox gets a 1600px webp of each photo; falls back to the original if resizing is unavailable.
 const big = async (img: Parameters<typeof photoUrl>[0]) => {
   const src = new URL(photoUrl(img), Astro.url.origin).href;
@@ -23,7 +29,7 @@ const css = projects.map(({ id }) => [
   tiles.map((_, i) => `::view-transition-group(m${i}){animation-delay:${Math.min(i * 22, 380)}ms}::view-transition-image-pair(m${i}){animation:tilt-${'abcd'[(i * 7) % 4]} .9s cubic-bezier(.6,0,.25,1) ${Math.min(i * 22, 380)}ms both}`).join('');
 ---
 <Base name={site.name} role={site.role} intro={site.intro}>
-  <div class="loader" aria-hidden="true"><span>0%</span></div>
+  <div class="loader" aria-hidden="true"><b>{site.name}</b><i></i></div>
   <style set:html={css}></style>
 
   <div class="split" data-open="">
@@ -72,7 +78,7 @@ const css = projects.map(({ id }) => [
           >
             <div class="cap"><b>{i === 0 ? p.title : ''}</b><span>{i === 0 ? p.year : i + 1}</span></div>
             <div class="ph">
-              <Image image={img} alt={img.alt || `${p.title}, image ${i + 1}`} sizes="(max-width: 800px) 50vw, 40vw" priority={n < 12} />
+              <Image image={img} alt={img.alt || `${p.title}, image ${i + 1}`} sizes={i === 0 ? '(max-width: 800px) 92vw, 72vw' : '(max-width: 800px) 92vw, 36vw'} priority={n < 12} />
             </div>
           </a>
         ))}
@@ -141,7 +147,8 @@ const css = projects.map(({ id }) => [
   const tick = () => (clock.textContent = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: clock.dataset.tz }).format(new Date()));
   tick(); setInterval(tick, 10000);
 
-  // Intro, every load: % counter on black, then panel fades in and tiles rise in a left to right wave.
+  // Intro: name and a thin progress line on black, then panel fades in and tiles rise in a left to right wave.
+  // Only on the first page view of a browser session; later views reveal straight away.
   const loader = document.querySelector<HTMLElement>('.loader')!;
   const io = new IntersectionObserver((es) => es.forEach((e) => {
     if (!e.isIntersecting) return;
@@ -173,23 +180,24 @@ const css = projects.map(({ id }) => [
   };
   let started = false;
   const go = () => { if (started) return; started = true; wave(); loader.classList.add('done'); root.classList.add('in'); };
-  // Never hold the page hostage: reveal after 4s even if a slow image or paused tab stalls the counter.
-  setTimeout(go, 4000);
-  if (reduce) go();
+  // Never hold the page hostage: reveal after 3s even if a slow image or paused tab stalls the line.
+  setTimeout(go, 3000);
+  const seen = sessionStorage.getItem('intro') === '1';
+  sessionStorage.setItem('intro', '1');
+  if (reduce || seen) { loader.classList.add('skip'); go(); }
   else {
-    const imgs = [...grid.querySelectorAll('img')].slice(0, 12);
-    const label = loader.querySelector('span')!;
+    const imgs = [...grid.querySelectorAll('img')].slice(0, 8);
     const start = performance.now();
     let shown = 0;
     let fontsOk = false;
     document.fonts.ready.then(() => (fontsOk = true));
     const frame = (t: number) => {
-      // Follows real image and font loading, but takes at least ~1.8s so the count reads.
+      // Follows real image and font loading; at least ~0.7s so the name registers instead of flashing.
       const ready = (imgs.filter((i) => i.complete).length + (fontsOk ? 1 : 0)) / (imgs.length + 1);
-      const target = Math.min(ready, (t - start) / 1800) * 100;
-      shown += (target - shown) * 0.08;
-      label.textContent = `${Math.floor(shown)}%`;
-      if (shown > 99.4) { label.textContent = '100%'; setTimeout(go, 300); } else if (!started) requestAnimationFrame(frame);
+      const target = Math.min(ready, (t - start) / 700);
+      shown += (target - shown) * 0.12;
+      loader.style.setProperty('--p', shown.toFixed(3));
+      if (shown > 0.995) { loader.style.setProperty('--p', '1'); setTimeout(go, 200); } else if (!started) requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
   }

@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import { getProfile } from '../lib/data';
+
+const site = await getProfile();
+if (Astro.cache?.enabled) Astro.cache.set({ ...site.cacheHint, maxAge: 3600, swr: 86400 });
+---
+<Base name={site.name} role={site.role} intro={site.intro}>
+  <main class="nf">
+    <p class="muted">404</p>
+    <h1>This page doesn't exist.</h1>
+    <a href="/">&larr; Back to all work</a>
+  </main>
+</Base>
+
+<style>
+  .nf { min-height: 100svh; display: grid; place-content: center; justify-items: start; gap: 14px; padding: var(--pad); }
+  .nf h1 { font: 500 30px/1.1 var(--serif); letter-spacing: -.02em; }
+  .nf a { border-bottom: 1px solid var(--line); padding: 4px 0; }
+  .nf a:hover { opacity: .5; }
+</style>

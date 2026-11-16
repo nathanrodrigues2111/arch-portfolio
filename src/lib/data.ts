@@ -5,9 +5,10 @@ type Item = { item: string };
 
 /** The single "About me" entry. Falls back to empty values so the page never crashes mid-edit. */
 export async function getProfile() {
-  const { entries } = await getEmDashCollection('profile', { status: 'published', limit: 1, orderBy: { created_at: 'asc' } });
+  const { entries, cacheHint } = await getEmDashCollection('profile', { status: 'published', limit: 1, orderBy: { created_at: 'asc' } });
   const d = (entries[0]?.data ?? {}) as Record<string, any>;
   return {
+    cacheHint,
     name: d.title ?? '',
     role: d.role ?? '',
     city: d.city ?? '',
@@ -21,10 +22,10 @@ export async function getProfile() {
   };
 }
 
-/** Published projects in page order, each with at least one photo. */
+/** Published projects in page order, each with at least one photo, plus the cache tags to purge on publish. */
 export async function getProjects() {
-  const { entries } = await getEmDashCollection('projects', { status: 'published', limit: 200, orderBy: { position: 'asc' } });
-  return entries
+  const { entries, cacheHint } = await getEmDashCollection('projects', { status: 'published', limit: 200, orderBy: { position: 'asc' } });
+  const list = entries
     .map((e) => {
       const d = e.data as Record<string, any>;
       return {
@@ -40,6 +41,7 @@ export async function getProjects() {
       };
     })
     .filter((p) => p.photos.length > 0);
+  return { list, cacheHint };
 }
 
 /** Original file URL for a stored photo (used for the lightbox). */

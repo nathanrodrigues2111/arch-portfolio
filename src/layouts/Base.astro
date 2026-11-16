@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import satoshi from '../fonts/satoshi.woff2?url';
 
 interface Props { name: string; role: string; intro: string }
 const { name, role, intro } = Astro.props;
@@ -12,6 +13,7 @@ const title = [name, role].filter(Boolean).join(', ');
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={intro} />
+    <link rel="preload" href={satoshi} as="font" type="font/woff2" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <noscript><style>.side>*,.tile{animation:none!important}.loader{display:none}</style></noscript>
   </head>
